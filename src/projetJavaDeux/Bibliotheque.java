@@ -1,99 +1,83 @@
 package projetJavaDeux;
+
 import java.util.ArrayList;
 import java.util.List;
 
-//-------------------------
+public class Bibliotheque {
+    private List<Livre> livres;
+    private List<Membre> membres;
+    private List<Emprunt> emprunts;
 
-public class Bibliotheque
-{
-    private List<Livre> livres = new ArrayList<>();
-    private List<Membre> membres = new ArrayList<>();
-    private List<Emprunt> emprunts = new ArrayList<>();
+    public Bibliotheque() {
+        this.livres = new ArrayList<>();
+        this.membres = new ArrayList<>();
+        this.emprunts = new ArrayList<>();
+    }
 
-    // Ajouter un livre
-    
-    public void ajouterLivre(Livre livre)
-    {
+    // Méthodes pour gérer les livres
+
+    public void ajouterLivre(Livre livre) {
+        livres.add(livre);
         LivreDAO.ajouterLivre(livre);
     }
 
-    // Rechercher un livre
-    
-    public Livre rechercherLivreById(int id)
-    {
-        return LivreDAO.getLivreById(id);
+    public Livre getLivreById(int id) {
+        return livres.stream().filter(l -> l.getId() == id).findFirst().orElse(LivreDAO.getLivreById(id));
     }
 
-    //------------------------------------------------------------------------------------------------
-    
-    // Ajouter un emprunt
-    
-    public static void enregistrerEmprunt(Emprunt emprunt)
-    {
-        EmpruntDAO.enregistrerEmprunt(emprunt);
-    }
-
-    // Récupérer un membre par ID
-    
-    public static Membre getMembreById(int id)
-    {
-        return MembreDAO.getMembreById(id); // Utilisation du DAO pour récupérer un membre par ID
-    }
-
-    // Récupérer un livre par ID
-    
-    public static Livre getLivreById(int id)
-    {
-        return LivreDAO.getLivreById(id); // Utilisation du DAO pour récupérer un livre par ID
-    }
-
-    //------------------------------------------------------------------------------------------------
-    
-    // Rechercher un livre par titre ou catégorie
-    public Livre rechercherLivre(String critere, String valeur)
-    {
-        for (Livre livre : livres)
-        {
-            if ((critere.equals("titre") && livre.getTitre().equals(valeur)) ||
-                (critere.equals("categorie") && livre.getCategorie().equals(valeur)))
-            {
-                return livre;
-            }
+    public List<Livre> getAllLivres() {
+        if (livres.isEmpty()) {
+            livres = LivreDAO.getAllLivres();
         }
-        return null;
+        return livres;
     }
 
-    // Afficher tous les livres
-    public void afficherLivres()
-    {
-        for (Livre livre : livres)
-        {
-            System.out.println(livre);
-        }
+    // Méthodes pour gérer les membres
+
+    public void ajouterMembre(Membre membre) {
+        membres.add(membre);
+        MembreDAO.ajouterMembre(membre);
     }
 
-    // Rechercher un membre par nom
-    public Membre rechercherMembre(String nom)
-    {
-        for (Membre membre : membres)
-        {
-            if (membre.getNom().equals(nom))
-            {
-                return membre;
-            }
-        }
-        return null;
+    public Membre getMembreById(int id) {
+        return membres.stream().filter(m -> m.getId() == id).findFirst().orElse(MembreDAO.getMembreById(id));
     }
 
-    // Afficher les emprunts en retard
-    public void afficherEmpruntsEnRetard()
-    {
-        for (Emprunt emprunt : emprunts)
-        {
-            if (emprunt.calculerPénalité() > 0)
-            {
-                System.out.println(emprunt);
-            }
+    public List<Membre> getAllMembres() {
+        if (membres.isEmpty()) {
+            membres = MembreDAO.getAllMembres();
         }
+        return membres;
+    }
+
+    // Méthodes pour gérer les emprunts
+
+    public void enregistrerEmprunt(Emprunt emprunt) {
+        emprunts.add(emprunt);
+        EmpruntDAO.ajouterEmprunt(emprunt);
+    }
+
+    public Emprunt getEmpruntById(int idEmprunt) {
+        return emprunts.stream().filter(e -> e.getIdEmprunt() == idEmprunt).findFirst().orElse(EmpruntDAO.getEmpruntById(idEmprunt));
+    }
+
+    public List<Emprunt> getAllEmprunts() {
+        if (emprunts.isEmpty()) {
+            emprunts = EmpruntDAO.getAllEmprunts();
+        }
+        return emprunts;
+    }
+
+    public List<Emprunt> getEmpruntsEnRetard() {
+        return EmpruntDAO.getEmpruntsEnRetard();
+    }
+
+    @Override
+    public String toString() {
+        return "Bibliotheque{" +
+                "livres=" + livres +
+                ", membres=" + membres +
+                ", emprunts=" + emprunts +
+                '}';
     }
 }
