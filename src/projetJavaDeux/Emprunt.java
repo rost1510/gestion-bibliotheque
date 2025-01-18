@@ -35,5 +35,14 @@ public class Emprunt
         this.dateEmprunt = dateEmprunt;
         this.dateRetourPrevue = dateRetourPrevue;
     }
+    
+    public void afficherDetails()
+    {
+        System.out.println("ID de l'emprunt: " + idEmprunt);
+        System.out.println("NI de l'emprunteur: " + idMembre);
+        System.out.println("NI du livre: " + idLivre);
+        System.out.println("Date de sortie: " + dateEmprunt);
+        System.out.println("Date de retour prévue: " + dateRetourPrevue);
+    }
 
 }

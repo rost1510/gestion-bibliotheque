@@ -2,9 +2,13 @@ package projetJavaDeux;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class EmpruntDAO
 {
@@ -46,16 +50,62 @@ public class EmpruntDAO
         // Code pour calculer le montant de la pénalité (par exemple, 100 F CFA par jour de retard)
         return 100.0;
     }
-
-    // Afficher les emprunts d'un membre
-    public List<Emprunt> afficherEmpruntsMembre(int membreId) {
-        // Code pour récupérer les emprunts d'un membre dans la base de données
+*/
+    // Afficher tous les emprunts
+    
+    public List<Emprunt> afficherTousLesEmprunts()
+    {
         List<Emprunt> emprunts = new ArrayList<>();
-        // Ajoutez des exemples d'emprunts fictifs
+
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery("SELECT * FROM tabemprunt"))
+        {
+            while (resultSet.next())
+            {
+                int idEmprunt = resultSet.getInt("id_emprunt");
+                int idMembre = resultSet.getInt("id_membre");
+                int idLivre = resultSet.getInt("id_livre");
+                LocalDate dateEmprunt = LocalDate.parse(resultSet.getString("date_emprunt"));
+                LocalDate dateRetourPrevue = LocalDate.parse(resultSet.getString("date_retour_prevue_emprunt"));
+                Emprunt emprunt = new Emprunt(idEmprunt, idMembre, idLivre, dateEmprunt, dateRetourPrevue);
+                emprunts.add(emprunt);
+            }
+
+        } catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
         return emprunts;
     }
 
-    // Afficher l'historique des emprunts d'un membre
+    // Afficher les emprunts pour un membre
+    
+    public List<Emprunt> afficherEmpruntsParMembre(int idMembre)
+    {
+        List<Livre> livres = new ArrayList<>();
+
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM tablivre WHERE titre_livre = ?")) {
+            preparedStatement.setString(1, titre_livre);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                int id_livre = resultSet.getInt("id_livre");
+                String titre = resultSet.getString("titre_livre");
+                String auteur_livre = resultSet.getString("auteur_livre");
+                String categorie_livre = resultSet.getString("categorie_livre");
+                int nombre_exemplaires_livre = resultSet.getInt("nombre_exemplaires_livre");
+                Livre livre = new Livre(id_livre, titre, auteur_livre, categorie_livre, nombre_exemplaires_livre);
+                livres.add(livre);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return livres;
+    }
+
+/*    // Afficher l'historique des emprunts d'un membre
     public List<Emprunt> afficherHistoriqueMembre(int membreId) {
         // Code pour récupérer l'historique des emprunts d'un membre
         List<Emprunt> emprunts = new ArrayList<>();

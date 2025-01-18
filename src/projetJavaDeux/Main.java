@@ -162,14 +162,14 @@ public class Main
     {
         System.out.print("Entrez le titre du livre: ");
         String titre = scanner.nextLine();
-        Livre livre = livreDAO.rechercherLivreParTitre(titre);
+        List<Livre> livres = livreDAO.rechercherLivreParTitre(titre);
 
-        if (livre != null)
-        {
-            livre.afficherDetails();
-        } else
-        {
+        if (livres.isEmpty()) {
             System.out.println("Livre non trouvé.");
+        } else {
+            for (Livre livre : livres) {
+                livre.afficherDetails();
+            }
         }
     }
 
@@ -177,9 +177,9 @@ public class Main
 
     public static void rechercherLivreParCategorie()
     {
-        System.out.print("Entrez la catégorie du livre: ");
+        System.out.print("Entrez la catégorie désirée: ");
         String categorie = scanner.nextLine();
-        List<Livre> livres = livreDAO.rechercherLivreParCategorie(categorie);	// une seule catégorie peut avoir plusieurs livres
+        List<Livre> livres = livreDAO.rechercherLivreParCategorie(categorie);
 
         if (livres.isEmpty())
         {
@@ -212,6 +212,7 @@ public class Main
         System.out.print("Entrez l'ID du livre à modifier: ");
         int idLivre = scanner.nextInt();
         scanner.nextLine();  // Consommer la nouvelle ligne
+        
         System.out.print("Nouveau titre: ");
         String titre = scanner.nextLine();
         System.out.print("Nouvel auteur: ");
@@ -220,7 +221,7 @@ public class Main
         String categorie = scanner.nextLine();
         System.out.print("Nouveau nombre d'exemplaires: ");
         int nombreExemplaires = scanner.nextInt();
-        scanner.nextLine();  // Consommer la nouvelle ligne
+        scanner.nextLine();
 
         Livre livre = new Livre(idLivre, titre, auteur, categorie, nombreExemplaires);
         livreDAO.modifierLivre(livre);
@@ -242,7 +243,6 @@ public class Main
         int idLivre = scanner.nextInt();
         scanner.nextLine();  // Consommer la nouvelle ligne
         livreDAO.supprimerLivre(idLivre);
-        System.out.println("Livre supprimé avec succès !");
     }
 
 
@@ -357,10 +357,10 @@ public class Main
                 	calculerPenalite();
                     break;
                 case 5:
-                	afficherListeEmprunts();
+                	afficherTousLesEmprunts();
                     break;
                 case 6:
-                	afficherDetailsEmprunt();
+                	afficherEmpruntsParMembre();
                     break;
                 case 0:
                     return;
@@ -409,17 +409,33 @@ public class Main
 
 		// 3.5	Afficher la liste des emprunts
     
-    public static void afficherListeEmprunts()
+    public static void afficherTousLesEmprunts()
     {
-	
-	}
+        List<Emprunt> emprunts = empruntDAO.afficherTousLesEmprunts();
+ 
+        for (Emprunt emprunt : emprunts)
+        {
+            emprunt.afficherDetails();
+        }
+    }
 
-		// 3.6	Afficher les détails d'un emprunt
+
+		// 3.6	Afficher les emprunts d'un membre
     
-	public static void afficherDetailsEmprunt()
-    {
-		
-	}
+	public static void afficherEmpruntsParMembre()
+	{
+        System.out.println("Entrez l'ID du membre: ");
+        int idMembre = scanner.nextInt();
+        List<Emprunt> emprunts = empruntDAO.afficherEmpruntsParMembre(idMembre);
+        if (emprunts.isEmpty()) {
+            System.out.println("Aucun emprunt trouvé pour ce membre.");
+        } else {
+            System.out.println("Liste des emprunts pour le membre " + idMembre + " :");
+            for (Emprunt emprunt : emprunts) {
+                emprunt.afficherDetails();
+            }
+        }
+    }
 
 	// 4.	Afficher le Menu de Gestion des pénalités
 
