@@ -1,63 +1,54 @@
 package projetJavaDeux;
-
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MembreDAO {
-
-    // Ajouter un membre
-    public static void ajouterMembre(Membre membre) {
-        String sql = "INSERT INTO membres (nom, prenom, email, adhesionDate) VALUES (?, ?, ?, ?)";
-        DatabaseUtil.executeUpdate(sql, membre.getNom(), membre.getPrenom(), membre.getEmail(), membre.getAdhesionDate());
-    }
-
-    // Récupérer un membre par ID
-    public static Membre getMembreById(int id) {
-        String sql = "SELECT * FROM membres WHERE id = ?";
-        return DatabaseUtil.executeQuery(sql, rs -> new Membre(
-                rs.getInt("id"),
-                rs.getString("nom"),
-                rs.getString("prenom"),
-                rs.getString("email"),
-                rs.getDate("adhesionDate")
-        ), id);
-    }
-
-    // Récupérer tous les membres
-    public static List<Membre> getAllMembres() {
-        List<Membre> membres = new ArrayList<>();
-        String sql = "SELECT * FROM membres";
-
-        try (Connection conn = DatabaseUtil.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
-            while (rs.next()) {
-                membres.add(new Membre(
-                        rs.getInt("id"),
-                        rs.getString("nom"),
-                        rs.getString("prenom"),
-                        rs.getString("email"),
-                        rs.getDate("adhesionDate")
-                ));
-            }
-        } catch (SQLException e) {
+public class MembreDAO
+{
+	// Établir la connexion avec la base de données
+	
+    private static final String URL = "jdbc:postgresql://localhost:5432/testBranch";
+    private static final String USER = "postgres";
+    private static final String PASSWORD = "postgres";
+    
+    // Ajouter un membre (implémentation de base)
+    
+    public void ajouterMembre(Membre membre)
+    {
+        // Code pour ajouter un membre dans la base de données
+    	
+    	String sql = "INSERT INTO tabmembre (nom_membre, prenom_membre, email_membre, date_adhesion_membre) VALUES (?, ?, ?, NOW())";
+    	
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+        	PreparedStatement stmt = conn.prepareStatement(sql)
+        	)
+        {
+            stmt.setString(1, membre.getNom());
+            stmt.setString(2, membre.getPrenom());
+            stmt.setString(3, membre.getEmail());
+            stmt.executeUpdate();
+        } catch (SQLException e)
+        {
             e.printStackTrace();
         }
-
-        return membres;
     }
 
-    // Supprimer un membre par ID
-    public static void supprimerMembre(int id) {
-        String sql = "DELETE FROM membres WHERE id = ?";
-        DatabaseUtil.executeUpdate(sql, id);
+/*    // Supprimer un membre
+    public void supprimerMembre(int id) {
+        // Code pour supprimer un membre de la base de données
+        System.out.println("Membre supprimé de la base de données.");
     }
 
-    // Mettre à jour les informations d'un membre
-    public static void mettreAJourMembre(Membre membre) {
-        String sql = "UPDATE membres SET nom = ?, prenom = ?, email = ?, adhesionDate = ? WHERE id = ?";
-        DatabaseUtil.executeUpdate(sql, membre.getNom(), membre.getPrenom(), membre.getEmail(), membre.getAdhesionDate(), membre.getId());
+    // Rechercher un membre par nom
+    public Membre rechercherMembreParNom(String nom) {
+        // Code pour rechercher un membre par nom dans la base de données
+        return new Membre(nom, "Prénom Exemple", "exemple@email.com", "2023-01-01");
     }
+
+    // Afficher les détails d'un membre
+    public Membre afficherDetailsMembre(int id) {
+        // Code pour afficher les détails d'un membre dans la base de données
+        return new Membre("Nom Exemple", "Prénom Exemple", "exemple@email.com", "2023-01-01");
+    }*/
 }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Bibliotheque {
-    private List<Livre> livres;
+/*    private List<Livre> livres;
     private List<Membre> membres;
     private List<Emprunt> emprunts;
 
@@ -79,5 +79,5 @@ public class Bibliotheque {
                 ", membres=" + membres +
                 ", emprunts=" + emprunts +
                 '}';
-    }
+    }*/
 }

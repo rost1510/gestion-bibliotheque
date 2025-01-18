@@ -7,9 +7,9 @@ import java.util.List;
 public class DatabaseUtil
 {
 
-    private static final String URL = "jdbc:postgresql://localhost:5432/gbibliotheque";
-    private static final String USER = "postgres"; // Remplacer par ton utilisateur PostgreSQL
-    private static final String PASSWORD = "postgres"; // Remplacer par ton mot de passe
+/*    private static final String URL = "jdbc:postgresql://localhost:5432/testBranch";
+    private static final String USER = "postgres";
+    private static final String PASSWORD = "postgres";
 
     // Méthode pour obtenir une connexion à la base de données
     public static Connection getConnection() throws SQLException {
@@ -59,5 +59,5 @@ public class DatabaseUtil
     // Interface pour manipuler le ResultSet de manière générique
     public interface ResultSetHandler<T> {
         T handle(ResultSet rs) throws SQLException;
-    }
+    }*/
 }

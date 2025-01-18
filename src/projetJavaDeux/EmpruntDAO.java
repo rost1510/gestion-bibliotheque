@@ -1,95 +1,77 @@
 package projetJavaDeux;
-
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EmpruntDAO {
+public class EmpruntDAO
+{
+    private static final String URL = "jdbc:postgresql://localhost:5432/testBranch";
+    private static final String USER = "postgres";
+    private static final String PASSWORD = "postgres";
+    
+    // Enregistrer un emprunt (implémentation de base)
+	
+    public void enregistrerEmprunt(Emprunt emprunt)
+    {
+    	
+        // Code pour insérer un emprunt dans la base de données
+    	
+    	String sql = "INSERT INTO tabemprunt (id_membre, id_livre, date_emprunt, date_retour_prevue_emprunt) VALUES (?, ?, NOW(), ?)";
 
-    // Ajouter un emprunt
-    public static void ajouterEmprunt(Emprunt emprunt) {
-        String sql = "INSERT INTO emprunts (membreId, livreId, dateEmprunt, dateRetourPrevue, dateRetourEffective) VALUES (?, ?, ?, ?, ?)";
-        DatabaseUtil.executeUpdate(sql, 
-            emprunt.getMembreId(), 
-            emprunt.getLivreId(), 
-            emprunt.getDateEmprunt(), 
-            emprunt.getDateRetourPrevue(), 
-            emprunt.getDateRetourEffective());
-    }
-
-    // Enregistrer un emprunt
-    public static void enregistrerEmprunt(Emprunt emprunt) {
-        ajouterEmprunt(emprunt); // Réutilisation
-    }
-
-    // Autres méthodes (getEmpruntById, getAllEmprunts, etc.)...
-
-    // Récupérer un emprunt par ID
-    public static Emprunt getEmpruntById(int idEmprunt) {
-        String sql = "SELECT * FROM emprunts WHERE idEmprunt = ?";
-        return DatabaseUtil.executeQuery(sql, rs -> new Emprunt(
-            rs.getInt("idEmprunt"),
-            rs.getInt("membreId"),
-            rs.getInt("livreId"),
-            rs.getDate("dateEmprunt"),
-            rs.getDate("dateRetourPrevue"),
-            rs.getDate("dateRetourEffective")
-        ), idEmprunt);
-    }
-
-    // Récupérer tous les emprunts
-    public static List<Emprunt> getAllEmprunts() {
-        List<Emprunt> emprunts = new ArrayList<>();
-        String sql = "SELECT * FROM emprunts";
-
-        try (Connection conn = DatabaseUtil.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
-            while (rs.next()) {
-                emprunts.add(new Emprunt(
-                    rs.getInt("idEmprunt"),
-                    rs.getInt("membreId"),
-                    rs.getInt("livreId"),
-                    rs.getDate("dateEmprunt"),
-                    rs.getDate("dateRetourPrevue"),
-                    rs.getDate("dateRetourEffective")
-                ));
-            }
-        } catch (SQLException e) {
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+            PreparedStatement stmt = conn.prepareStatement(sql)
+            )
+        {
+            stmt.setInt(1, emprunt.getIdMembre());	// utiliser setInt pour un entier
+            stmt.setInt(2, emprunt.getIdLivre());
+            stmt.setObject(3, emprunt.getDateRetourPrevue());	// utiliser setObject pour LocalDate
+            stmt.executeUpdate();
+        } catch (SQLException e)
+        {
             e.printStackTrace();
         }
+    }
+
+/*    // Retourner un emprunt
+    public void retournerEmprunt(int idEmprunt) {
+        // Code pour marquer l'emprunt comme retourné dans la base de données
+        System.out.println("Emprunt retourné dans la base de données.");
+    }
+
+    // Calculer les pénalités (si applicable)
+    public double calculerPenalite(Emprunt emprunt) {
+        // Code pour calculer le montant de la pénalité (par exemple, 100 F CFA par jour de retard)
+        return 100.0;
+    }
+
+    // Afficher les emprunts d'un membre
+    public List<Emprunt> afficherEmpruntsMembre(int membreId) {
+        // Code pour récupérer les emprunts d'un membre dans la base de données
+        List<Emprunt> emprunts = new ArrayList<>();
+        // Ajoutez des exemples d'emprunts fictifs
         return emprunts;
     }
 
-    // Mettre à jour la date de retour effective
-    public static void mettreAJourDateRetour(int idEmprunt, Date dateRetourEffective) {
-        String sql = "UPDATE emprunts SET dateRetourEffective = ? WHERE idEmprunt = ?";
-        DatabaseUtil.executeUpdate(sql, dateRetourEffective, idEmprunt);
+    // Afficher l'historique des emprunts d'un membre
+    public List<Emprunt> afficherHistoriqueMembre(int membreId) {
+        // Code pour récupérer l'historique des emprunts d'un membre
+        List<Emprunt> emprunts = new ArrayList<>();
+        // Ajoutez des exemples d'emprunts fictifs
+        return emprunts;
     }
 
-    // Récupérer les emprunts en retard
-    public static List<Emprunt> getEmpruntsEnRetard() {
-        List<Emprunt> empruntsEnRetard = new ArrayList<>();
-        String sql = "SELECT * FROM emprunts WHERE dateRetourPrevue < CURRENT_DATE AND dateRetourEffective IS NULL";
-
-        try (Connection conn = DatabaseUtil.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
-            while (rs.next()) {
-                empruntsEnRetard.add(new Emprunt(
-                    rs.getInt("idEmprunt"),
-                    rs.getInt("membreId"),
-                    rs.getInt("livreId"),
-                    rs.getDate("dateEmprunt"),
-                    rs.getDate("dateRetourPrevue"),
-                    rs.getDate("dateRetourEffective")
-                ));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return empruntsEnRetard;
+    // Vérifier la disponibilité d'un livre
+    public boolean verifierDisponibiliteLivre(int livreId) {
+        // Code pour vérifier la disponibilité d'un livre
+        return true;
     }
+
+    // Afficher l'historique des livres
+    public List<Emprunt> afficherHistoriqueLivres() {
+        // Code pour récupérer l'historique des livres empruntés
+        return new ArrayList<>();
+    }*/
 }
