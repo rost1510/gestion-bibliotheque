@@ -13,7 +13,7 @@ public class Main
     private static LivreDAO livreDAO = new LivreDAO();
     private static MembreDAO membreDAO = new MembreDAO();
     private static EmpruntDAO empruntDAO = new EmpruntDAO();
-    private static PenaliteDAO penaliteDAO = new PenaliteDAO();
+    private static RetourDAO retourDAO = new RetourDAO();
     private static HistoriqueEmpruntDAO historiqueEmpruntDAO = new HistoriqueEmpruntDAO();
     //-----------------------------------------------------------------------------------
     
@@ -31,9 +31,8 @@ public class Main
             System.out.println("=== Menu Principal ===");
             System.out.println("1. Gestion de livres");
             System.out.println("2. Gestion des membres");
-            System.out.println("3. Gestion d'emprunt");
-            System.out.println("4. Gestion de pénalités");
-            System.out.println("5. Quitter");
+            System.out.println("3. Gestion des transactions");
+            System.out.println("4. Quitter");
             System.out.print("Indiquez votre choix par un numéro de [1;5]: ");
 
             int choix = scanner.nextInt();
@@ -48,12 +47,9 @@ public class Main
                     afficherMenuMembres();
                     break;
                 case 3:
-                    afficherMenuEmprunts();
+                    afficherMenuTransaction();
                     break;
                 case 4:
-                    afficherMenuPenalites();
-                    break;
-                case 5:
                     System.out.println("Au revoir !");
                     return;
                 default:
@@ -72,8 +68,7 @@ public class Main
             System.out.println("2. Rechercher");
             System.out.println("3. Voir tous");
             System.out.println("4. Modifier");
-            System.out.println("5. Historique");
-            System.out.println("6. Supprimer");
+            System.out.println("5. Supprimer");
             System.out.println("0. Retour");
             System.out.print("Indiquez votre choix parmi les numéros (1-6 ou 0): ");
 
@@ -83,7 +78,8 @@ public class Main
             switch (choix)
             {
                 case 1:
-                    ajouterLivre();
+                	afficherMenuAjouterLivre();
+//                    ajouterLivre();
                     break;
                 case 2:
                     afficherMenuRechercheLivre();
@@ -104,8 +100,65 @@ public class Main
             }
         }
     }
+	
+		// 1.1 Afficher menu d'ajout d'un livre
+	
+    public static void afficherMenuAjouterLivre()
+    {
+        while (true)
+        {
+            System.out.println("\n=== Ajouter un livre ===");
+            System.out.println("1. Livre existant");
+            System.out.println("2. Créer nouveau");
+            System.out.println("0. Retour");
+            System.out.print("Indiquez votre choix parmi les numéros (1-2 ou 0): ");
+
+            int choix = scanner.nextInt();
+            scanner.nextLine();  // Consommer la nouvelle ligne après un entier
+
+            switch (choix)
+            {
+                case 1:
+                    ajouterQuantite();
+                    return;
+                case 2:
+                	ajouterLivre();
+                    return;
+                case 0:
+                    return;
+                default:
+                    System.out.println("Choix invalide. Essayez encore.");
+            }
+        }
+    }
+
+			// 1.1.1	Ajouter un livre existant
+
+    public static void ajouterQuantite()
+    {
+        System.out.print("Entrez l'ID ou le titre du livre: ");
+        String identifiant = scanner.nextLine();
+        System.out.print("Nombre d'exemplaires à ajouter: ");
+        int quantite = scanner.nextInt();
+        scanner.nextLine();  // Consommer la nouvelle ligne
+
+        boolean result;
+        try
+        {
+            int id = Integer.parseInt(identifiant);
+            result = livreDAO.ajouterQuantiteParId(id, quantite);
+        } catch (NumberFormatException e) {
+            result = livreDAO.ajouterQuantiteParTitre(identifiant, quantite);
+        }
+
+        if (result) {
+            System.out.println("Quantité ajoutée avec succès !");
+        } else {
+            System.out.println("Livre non trouvé.");
+        }
+    }
     
-    	// 1.1	Ajouter un livre
+    		// 1.1.2	Ajouter un livre nouveau
     
     public static void ajouterLivre()
     {
@@ -125,7 +178,7 @@ public class Main
         System.out.println("Livre ajouté avec succès !");
     }
     
-    	// 1.2	Afficher du Menu de Recherche d'un livre
+    	// 1.2	Afficher Menu de Recherche d'un livre
     
     public static void afficherMenuRechercheLivre()
     {
@@ -228,14 +281,7 @@ public class Main
         System.out.println("Livre modifié avec succès !");
     }
     
-		// 1.5	Afficher historique d'un livre (entrées et sorties)
-    
-    public static void afficherHistoriqueEmpruntsLivres()
-    {
-	
-    }
-
-    	// 1.6	Supprimer un livre
+    	// 1.5	Supprimer un livre
     
     public static void supprimerLivre()
     {
@@ -245,7 +291,6 @@ public class Main
         livreDAO.supprimerLivre(idLivre);
     }
 
-
     // 2.	Afficher le Menu de Gestion des membres
    
     public static void afficherMenuMembres() {
@@ -254,7 +299,7 @@ public class Main
             System.out.println("1. Ajouter");
             System.out.println("2. Supprimer");
             System.out.println("3. Rechercher");
-            System.out.println("4. Profil");
+//            System.out.println("4. Profil");
             System.out.println("0. Retourner au menu principal");
             System.out.print("Choisissez une option (1-4, ou 0): ");
 
@@ -269,10 +314,7 @@ public class Main
                     supprimerMembre();
                     break;
                 case 3:
-                    rechercherMembre();
-                    break;
-                case 4:
-                    afficherProfilMembre();
+                	rechercherMembreParID();
                     break;
                 case 0:
                     return;
@@ -303,41 +345,40 @@ public class Main
 
     public static void supprimerMembre()
     {
-        // Implémentez la méthode de suppression du membre ici
+        System.out.print("Entrez l'ID du membre à supprimer: ");
+        int idLivre = scanner.nextInt();
+        scanner.nextLine();  // Consommer la nouvelle ligne
+        membreDAO.supprimerMembre(idLivre);
     }
 
     
     	// 2.3	Rechercher un membre
 
-    public static void rechercherMembre()
- 	{
-        // Implémentez la méthode de recherche du membre ici
-    }
-
-
-    	// 2.4	Afficher le profil d'un membre
-    
-    public static void afficherProfilMembre()
+    public static void rechercherMembreParID()
     {
-        // Implémentez la méthode d'affichage des détails du membre ici
-    }
+        System.out.print("Entrez l'ID du membre: ");
+        int id = scanner.nextInt();
+        scanner.nextLine();  // Consommer la nouvelle ligne
+        Membre membre = membreDAO.rechercherMembreParID(id);
 
+        if (membre != null) {
+            membre.afficherDetails();
+        } else {
+            System.out.println("Membre non trouvé.");
+        }
+    }
     
-    // 3.	Afficher le Menu de Gestion des emprunts
+    // 3.	Afficher les transactions
     
-    public static void afficherMenuEmprunts()
+    public static void afficherMenuTransaction()
     {
         while (true)
         {
-            System.out.println("\n=== Gestion des Emprunts ===");
-            System.out.println("1. Disponible");	// rechercher d'un livre	1.2 
-            System.out.println("2. Nouveau");
-            System.out.println("3. Retour");
-            System.out.println("4. Pénalité");
-            System.out.println("5. Tous les emprunts");
-            System.out.println("6. Rechercher");
+            System.out.println("\n=== Gestion des Transactions ===");
+            System.out.println("1. Emprunts");	// rechercher d'un livre	1.2 
+            System.out.println("2. Retours");
             System.out.println("0. Retourner au menu principal");
-            System.out.print("Choisissez une option (1-6, ou 0): ");
+            System.out.print("Choisissez une option (1-2, ou 0): ");
 
             int choix = scanner.nextInt();
             scanner.nextLine();  // Consommer la nouvelle ligne après un entier
@@ -345,22 +386,10 @@ public class Main
             switch (choix)
             {
                 case 1:
-                    verifierDisponibiliteLivre();
+                    menuEmprunts();
                     break;
                 case 2:
-                	enregistrerEmprunt();
-                    break;
-                case 3:
-                	retournerEmprunt();
-                    break;
-                case 4:
-                	calculerPenalite();
-                    break;
-                case 5:
-                	afficherTousLesEmprunts();
-                    break;
-                case 6:
-                	afficherEmpruntsParMembre();
+                	menuRetours();
                     break;
                 case 0:
                     return;
@@ -370,14 +399,61 @@ public class Main
         }
     }
     
-		// 3.1	Vérifier la disponibilité d'un livre
+    	// 3.1	Les emprunts
+    
+    public static void menuEmprunts()
+    {
+        while (true)
+        {
+            System.out.println("\n=== Gestion des Emprunts ===");
+            System.out.println("1. Vérifier Disponibilité");	// rechercher d'un livre	1.2 
+            System.out.println("2. Emprunt");
+            System.out.println("4. Tous les emprunts");
+            System.out.println("5. Mes emprunts");
+            System.out.println("0. Retourner au menu principal");
+            System.out.print("Choisissez une option (1-2, ou 0): ");
+
+            int choix = scanner.nextInt();
+            scanner.nextLine();  // Consommer la nouvelle ligne après un entier
+
+            switch (choix)
+            {
+            case 1:
+                verifierDisponibiliteLivre();
+                break;
+            case 2:
+            	enregistrerEmprunt();
+                break;
+            case 3:
+            	afficherTousLesEmprunts();
+                break;
+            case 4:
+            	afficherEmpruntsParMembre();
+                break;
+                case 0:
+                    return;
+                default:
+                    System.out.println("Option invalide. Essayez encore.");
+            }
+        }
+    }
+
+    		// 3.1.1	Vérifier la disponibilité d'un livre
     
     public static void verifierDisponibiliteLivre()
     {
+        System.out.print("Entrez le titre du livre: ");
+        String titre = scanner.nextLine();
+        boolean disponible = livreDAO.verifierDisponibiliteLivre(titre);
 
-	}
+        if (disponible) {
+            System.out.println("Livre disponible.");
+        } else {
+            System.out.println("Livre indisponible.");
+        }
+    }
 
-		// 3.2	Enregistre un emprunt
+			// 3.1.2	Enregistre un emprunt
     
     public static void enregistrerEmprunt()
     {
@@ -392,22 +468,8 @@ public class Main
         empruntDAO.enregistrerEmprunt(emprunt);	// Appeler la méthode pour ajouter l'emprunt
         System.out.println("Eprunt ajouté avec succès.");
     }
-
-		// 3.3	Retourner un emprunt
     
-	public static void retournerEmprunt()
-	{
-		
-	}
-
-		// 3.4	Calculer la pénalité
-	
-	public static void calculerPenalite()
-	{
-		
-	}
-
-		// 3.5	Afficher la liste des emprunts
+			// 3.1.3	Afficher la liste des emprunts
     
     public static void afficherTousLesEmprunts()
     {
@@ -419,8 +481,7 @@ public class Main
         }
     }
 
-
-		// 3.6	Afficher les emprunts d'un membre
+				// 3.1.4	Afficher les emprunts d'un membre
     
 	public static void afficherEmpruntsParMembre()
 	{
@@ -435,124 +496,142 @@ public class Main
                 emprunt.afficherDetails();
             }
         }
-    }
+    }	
+	
+		// 3.2	Les Retours
 
-	// 4.	Afficher le Menu de Gestion des pénalités
+	public static void menuRetours()
+	{
+		while (true)
+		{
+			System.out.println("\n=== Gestion des Emprunts ===");
+			System.out.println("1. Enregistrer Retour");
+            System.out.println("2. Consulter les pénalités");
+            System.out.println("3. Endosser une pénalité");
+			System.out.println("0. Retourner au menu principal");
+			System.out.print("Choisissez une option (1-2, ou 0): ");
 
-    public static void afficherMenuPenalites()
-    {
-        while (true)
-        {
-            System.out.println("\n=== Gestion des Pénalités ===");
-            System.out.println("1. Enregistre une pénalité");
-            System.out.println("2. Endosser une pénalité");
-            System.out.println("3. Consulter les pénalités");
-            System.out.println("4. Rechercher une pénalités");
-            System.out.println("0. Retour");
-            System.out.print("Indiquez votre choix parmi (1-2 ou 0): ");
+			int choix = scanner.nextInt();
+			scanner.nextLine();  // Consommer la nouvelle ligne après un entier
 
-            int choix = scanner.nextInt();
-            scanner.nextLine();  // Consommer la nouvelle ligne après un entier
-
-            switch (choix)
-            {
-            	case 1:
-            		ajouterPenalite();
-            		break;
-            		
-            	case 2:
+			switch (choix)
+			{
+				case 1:
+					retourEmprunt();
+					break;
+                case 2:
+                	menuConsultationPenalite();
+                    break;
+            	case 3:
             		endosserPenalite();
                     break;
-                case 3:
-                	consulterPenalites();
-                    break;
-                case 4:
-                    afficherMenuRecherchePenalite();
-                    break;
-                case 0:
-                    return;
-                default:
-                    System.out.println("Choix invalide. Essayez encore.");
-            }
-        }
-    }
-    
-		// 4.1	Ajouter une pénalité
-    
-    public static void ajouterPenalite()
-	{
+				case 0:
+					return;
+				default:
+                System.out.println("Option invalide. Essayez encore.");
+			}
+		}
+	}
 	
+			// 3.2.1	Enregistrer Retour
+
+	public static void retourEmprunt()
+	{
+		System.out.print("Entrez l'ID de l'emprunt à retourner : ");
+		int idEmprunt = Integer.parseInt(scanner.nextLine());
+
+		Emprunt emprunt = empruntDAO.getEmpruntById(idEmprunt);
+		if (emprunt == null)
+		{
+			System.out.println("Emprunt non trouvé.");
+			return;
+		}
+
+		// Afficher les détails de l'emprunt
+    
+		emprunt.afficherDetails();
+
+		// Demander la date de retour
+    
+		System.out.print("Date de retour (format YYYY-MM-DD) : ");
+		LocalDate dateRetour = LocalDate.parse(scanner.nextLine());
+
+		// Calculer la pénalité
+    
+		long joursRetard = java.time.temporal.ChronoUnit.DAYS.between(emprunt.getDateRetourPrevue(), dateRetour);
+		int penalite = (int) joursRetard * 100;
+
+		// Créer et enregistrer le retour
+
+		Retour retour = new Retour(0, idEmprunt, dateRetour, penalite);
+		retourDAO.enregistrerRetour(retour);
+
+		// Afficher les détails du retour
+
+		retour.afficherDetails();
+	}
+	
+
+
+			// 3.2.2	Consulter les pénalités
+
+	public static void menuConsultationPenalite()
+	{
+		while (true)
+		{
+			System.out.println("\n=== Consulter par : ===");
+			System.out.println("1. id_penalite");
+			System.out.println("2. id_membre");
+			System.out.println("3. nom_membre");
+			System.out.println("0. Retour");
+			System.out.print("Indiquez votre choix parmi (1-3 ou 0): ");
+
+			int choix = scanner.nextInt();
+			scanner.nextLine();  // Consommer la nouvelle ligne après un entier
+
+			switch (choix)
+			{
+			case 1:
+				consultationParIdPenalite();
+				break;
+			case 2:
+				consultationParIdMembre();
+				break;
+			case 3:
+            	consultationParNomMembre();
+                break;
+			case 0:
+				return;
+			default:
+				System.out.println("Choix invalide. Essayez encore.");
+			}
+		}
 	}
 
-		// 4.2	Endosser une pénalités
+					// 3.2.2.1	Rechercher une pénalité par ID PENALITE
+	public static void consultationParIdPenalite()
+	{
+		System.out.println("EN COURS DE DEVELOPPEMENT !");
+	}
+
+					// 3.2.2.2	Rechercher une pénalité par ID MEMBRE
+
+	public static void consultationParIdMembre()
+	{
+		System.out.println("EN COURS DE DEVELOPPEMENT !");
+	}
+
+					// 3.2.2.3	Rechercher une pénalité par NOM DU MEMBRE
+
+	public static void consultationParNomMembre()
+	{
+		System.out.println("EN COURS DE DEVELOPPEMENT !");
+	}
+
+			// 3.2.3	Endosser Pénalité
     
 	public static void endosserPenalite()
 	{
-		
-	}    
-    
-		// 4.3	Consulter la liste des pénalités
-	
-	public static void consulterPenalites()
-	{
-	
-	}	
-
-    	// 4.4	Afficher les critères de la recherche d'une pénalité
-	
-    public static void afficherMenuRecherchePenalite()
-    {
-        while (true)
-        {
-            System.out.println("\n=== Rechercher par : ===");
-            System.out.println("1. id_penalite");
-            System.out.println("2. id_membre");
-            System.out.println("3. nom_membre");
-            System.out.println("0. Retour");
-            System.out.print("Indiquez votre choix parmi (1-3 ou 0): ");
-
-            int choix = scanner.nextInt();
-            scanner.nextLine();  // Consommer la nouvelle ligne après un entier
-
-            switch (choix)
-            {
-            	case 1:
-            		recherchePenaliteParIdPenalite();
-            		break;
-            		
-            	case 2:
-            		recherchePenaliteParIdMembre();
-                    break;
-                case 3:
-                	recherchePenaliteParNomMembre();
-                    break;
-                case 0:
-                    return;
-                default:
-                    System.out.println("Choix invalide. Essayez encore.");
-            }
-        }
-    }
-    
-			// 4.4.1	Rechercher une pénalité par ID PENALITE
-    
-    public static void recherchePenaliteParIdPenalite()
-    {
-			
-    }
-
-    		// 4.4.2	Rechercher une pénalité par ID MEMBRE
-    
-    public static void recherchePenaliteParIdMembre()
-    {
-			
-    }
-
-    		// 4.4.3	Rechercher une pénalité par NOM DU MEMBRE
-    
-    public static void recherchePenaliteParNomMembre()
-    {
-		
-    }
-
+		System.out.println("EN COURS DE DEVELOPPEMENT !");
+	}
 }

@@ -13,7 +13,7 @@ public class LivreDAO
     private static final String PASSWORD = "postgres";
     
     
-    // Méthode pour Ajouter un livre (implémentation de base)
+    // Méthode pour Ajouter un livre nouveau (implémentation de base)
 	
     public void ajouterLivre(Livre livre)	
     {    	
@@ -31,11 +31,43 @@ public class LivreDAO
             stmt.setString(3, livre.getCategorie());
             stmt.setInt(4, livre.getNombreExemplaires());
             stmt.executeUpdate();
-
-            System.out.println("Livre ajouté avec succès !");
         } catch (SQLException e)
         {
         	e.printStackTrace();
+        }
+    }
+    
+ // Méthode pour ajouter la quantité d'un livre existant par ID
+    public boolean ajouterQuantiteParId(int id, int quantite) {
+        String query = "UPDATE tablivre SET nombre_exemplaires_livre = nombre_exemplaires_livre + ? WHERE id_livre = ?";
+        
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, quantite);
+            stmt.setInt(2, id);
+            
+            int rowsUpdated = stmt.executeUpdate();
+            return rowsUpdated > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Méthode pour ajouter la quantité d'un livre existant par titre
+    public boolean ajouterQuantiteParTitre(String titre, int quantite) {
+        String query = "UPDATE tablivre SET nombre_exemplaires_livre = nombre_exemplaires_livre + ? WHERE titre_livre = ?";
+        
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, quantite);
+            stmt.setString(2, titre);
+            
+            int rowsUpdated = stmt.executeUpdate();
+            return rowsUpdated > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
@@ -179,5 +211,34 @@ public class LivreDAO
             System.err.println("Erreur lors de la suppression du livre : " + e.getMessage());
             e.printStackTrace();
         }
+    }
+    
+    // Vérifier la disponibilité d'un livre
+    
+    public boolean verifierDisponibiliteLivre(String titre)
+    {
+        String query = "SELECT nombre_exemplaires_livre FROM tablivre WHERE titre_livre = ?";
+        boolean disponible = false;
+
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement preparedStatement = connection.prepareStatement(query))
+        {
+            preparedStatement.setString(1, titre);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next())
+            {
+                int nombreExemplaires = resultSet.getInt("nombre_exemplaires_livre");
+                if (nombreExemplaires >= 1)
+                {
+                    disponible = true;
+                }
+            }
+        } catch (SQLException e)
+        {
+            System.err.println("Erreur lors de la vérification de la disponibilité du livre : " + e.getMessage());
+            e.printStackTrace();
+        }
+        return disponible;
     }
 }

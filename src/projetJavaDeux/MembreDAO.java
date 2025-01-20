@@ -34,19 +34,62 @@ public class MembreDAO
         }
     }
 
-/*    // Supprimer un membre
-    public void supprimerMembre(int id) {
-        // Code pour supprimer un membre de la base de données
-        System.out.println("Membre supprimé de la base de données.");
+    // Supprimer un membre
+    public void supprimerMembre(int id) 
+    {
+        String query = "DELETE FROM tabmembre WHERE id_membre = ?";
+
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement preparedStatement = connection.prepareStatement(query))
+        {     
+            preparedStatement.setInt(1, id);
+            
+            int rowsDeleted = preparedStatement.executeUpdate();
+            if (rowsDeleted > 0)
+            {
+                System.out.println("Membre supprimé avec succès.");
+            } else
+            {
+                System.out.println("Aucun membre trouvé avec cet ID.");
+            }
+        } catch (SQLException e)
+        {
+            System.err.println("Erreur lors de la suppression du livre : " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
-    // Rechercher un membre par nom
-    public Membre rechercherMembreParNom(String nom) {
-        // Code pour rechercher un membre par nom dans la base de données
-        return new Membre(nom, "Prénom Exemple", "exemple@email.com", "2023-01-01");
+    // Rechercher un membre par ID
+    
+    public Membre rechercherMembreParID(int id)
+    {
+        String query = "SELECT * FROM tabmembre WHERE id_membre = ?";
+        Membre membre = null;
+
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+             
+            preparedStatement.setInt(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                String nom = resultSet.getString("nom_membre");
+                String prenom = resultSet.getString("prenom_membre");
+                String email = resultSet.getString("email_membre");
+                Date adhesionDate = resultSet.getDate("date_adhesion_membre");
+
+                membre = new Membre(id, nom, prenom, email, adhesionDate);
+            }
+        } catch (SQLException e)
+        {
+            System.err.println("Erreur lors de la recherche du membre : " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return membre;
     }
 
-    // Afficher les détails d'un membre
+/*    // Afficher les détails d'un membre
     public Membre afficherDetailsMembre(int id) {
         // Code pour afficher les détails d'un membre dans la base de données
         return new Membre("Nom Exemple", "Prénom Exemple", "exemple@email.com", "2023-01-01");

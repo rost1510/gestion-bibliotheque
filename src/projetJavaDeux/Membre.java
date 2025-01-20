@@ -39,7 +39,7 @@ public class Membre
 
 
 
-/*    // Méthode pour afficher les détails du membre
+    // Méthode pour afficher les détails du membre
 
     public void afficherDetails() {
         System.out.println("ID: " + id);
@@ -47,5 +47,5 @@ public class Membre
         System.out.println("Prénom: " + prenom);
         System.out.println("Email: " + email);
         System.out.println("Date d'adhésion: " + adhesionDate);
-    }	*/
+    }
 }

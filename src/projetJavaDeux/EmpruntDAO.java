@@ -20,37 +20,46 @@ public class EmpruntDAO
 	
     public void enregistrerEmprunt(Emprunt emprunt)
     {
-    	
-        // Code pour insérer un emprunt dans la base de données
-    	
-    	String sql = "INSERT INTO tabemprunt (id_membre, id_livre, date_emprunt, date_retour_prevue_emprunt) VALUES (?, ?, NOW(), ?)";
+        String sqlEmprunt = "INSERT INTO tabemprunt (id_membre, id_livre, date_emprunt, date_retour_prevue_emprunt) VALUES (?, ?, NOW(), ?)";
+        String sqlUpdateLivre = "UPDATE tablivre SET nombre_exemplaires_livre = nombre_exemplaires_livre - 1 WHERE id_livre = ?";
 
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
-            PreparedStatement stmt = conn.prepareStatement(sql)
-            )
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD))
         {
-            stmt.setInt(1, emprunt.getIdMembre());	// utiliser setInt pour un entier
-            stmt.setInt(2, emprunt.getIdLivre());
-            stmt.setObject(3, emprunt.getDateRetourPrevue());	// utiliser setObject pour LocalDate
-            stmt.executeUpdate();
+            // Commencer une transaction
+            conn.setAutoCommit(false);
+
+            try (PreparedStatement stmtEmprunt = conn.prepareStatement(sqlEmprunt);
+                 PreparedStatement stmtUpdateLivre = conn.prepareStatement(sqlUpdateLivre))
+            {
+                // Enregistrer l'emprunt
+            	
+                stmtEmprunt.setInt(1, emprunt.getIdMembre()); // utiliser setInt pour un entier
+                stmtEmprunt.setInt(2, emprunt.getIdLivre());
+                stmtEmprunt.setObject(3, emprunt.getDateRetourPrevue()); // utiliser setObject pour LocalDate
+                stmtEmprunt.executeUpdate();
+
+                // Décrémenter la quantité du livre emprunté
+                
+                stmtUpdateLivre.setInt(1, emprunt.getIdLivre());
+                stmtUpdateLivre.executeUpdate();
+
+                // Confirmer la transaction
+                
+                conn.commit();
+            } catch (SQLException e)
+            {
+                // En cas d'erreur, annuler la transaction
+                
+            	conn.rollback();
+                throw e;
+            }
         } catch (SQLException e)
         {
+            System.err.println("Erreur lors de l'enregistrement de l'emprunt : " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-/*    // Retourner un emprunt
-    public void retournerEmprunt(int idEmprunt) {
-        // Code pour marquer l'emprunt comme retourné dans la base de données
-        System.out.println("Emprunt retourné dans la base de données.");
-    }
-
-    // Calculer les pénalités (si applicable)
-    public double calculerPenalite(Emprunt emprunt) {
-        // Code pour calculer le montant de la pénalité (par exemple, 100 F CFA par jour de retard)
-        return 100.0;
-    }
-*/
     // Afficher tous les emprunts
     
     public List<Emprunt> afficherTousLesEmprunts()
@@ -82,27 +91,56 @@ public class EmpruntDAO
 
     // Afficher les emprunts pour un membre
     
-    public List<Emprunt> afficherEmpruntsParMembre(int idMembre)
-    {
-        List<Livre> livres = new ArrayList<>();
+    public List<Emprunt> afficherEmpruntsParMembre(int idMembre) {
+        List<Emprunt> emprunts = new ArrayList<>();
 
+        String query = "SELECT * FROM tabemprunt WHERE id_membre = ?";
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM tablivre WHERE titre_livre = ?")) {
-            preparedStatement.setString(1, titre_livre);
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+             
+            preparedStatement.setInt(1, idMembre);
             ResultSet resultSet = preparedStatement.executeQuery();
+            
             while (resultSet.next()) {
-                int id_livre = resultSet.getInt("id_livre");
-                String titre = resultSet.getString("titre_livre");
-                String auteur_livre = resultSet.getString("auteur_livre");
-                String categorie_livre = resultSet.getString("categorie_livre");
-                int nombre_exemplaires_livre = resultSet.getInt("nombre_exemplaires_livre");
-                Livre livre = new Livre(id_livre, titre, auteur_livre, categorie_livre, nombre_exemplaires_livre);
-                livres.add(livre);
+                int idEmprunt = resultSet.getInt("id_emprunt");
+                int idLivre = resultSet.getInt("id_livre");
+                LocalDate dateEmprunt = resultSet.getDate("date_emprunt").toLocalDate();
+                LocalDate dateRetourPrevue = resultSet.getDate("date_retour_prevue_emprunt").toLocalDate();
+                Emprunt emprunt = new Emprunt(idEmprunt, idMembre, idLivre, dateEmprunt, dateRetourPrevue);
+                emprunts.add(emprunt);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return livres;
+
+        return emprunts;
+    }
+    
+    // Méthode pour obtenir un emprunt par son ID
+    
+    public Emprunt getEmpruntById(int idEmprunt)
+    {
+        String query = "SELECT * FROM tabemprunt WHERE id_emprunt = ?";
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement preparedStatement = connection.prepareStatement(query))
+        {
+            preparedStatement.setInt(1, idEmprunt);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            
+            if (resultSet.next())
+            {
+                int idMembre = resultSet.getInt("id_membre");
+                int idLivre = resultSet.getInt("id_livre");
+                LocalDate dateEmprunt = resultSet.getDate("date_emprunt").toLocalDate();
+                LocalDate dateRetourPrevue = resultSet.getDate("date_retour_prevue_emprunt").toLocalDate();
+                return new Emprunt(idEmprunt, idMembre, idLivre, dateEmprunt, dateRetourPrevue);
+            }
+        } catch (SQLException e)
+        {
+            System.err.println("Erreur lors de la récupération de l'emprunt : " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
     }
 
 /*    // Afficher l'historique des emprunts d'un membre
