@@ -1,21 +1,16 @@
 package projetJavaDeux;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class EmpruntDAO
 {
-    private static final String URL = "jdbc:postgresql://localhost:5432/testBranch";
-    private static final String USER = "postgres";
-    private static final String PASSWORD = "postgres";
-    
     // Enregistrer un emprunt (implémentation de base)
 	
     public void enregistrerEmprunt(Emprunt emprunt)
@@ -23,25 +18,26 @@ public class EmpruntDAO
         String sqlEmprunt = "INSERT INTO tabemprunt (id_membre, id_livre, date_emprunt, date_retour_prevue_emprunt) VALUES (?, ?, NOW(), ?)";
         String sqlUpdateLivre = "UPDATE tablivre SET nombre_exemplaires_livre = nombre_exemplaires_livre - 1 WHERE id_livre = ?";
 
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD))
+        try (Connection conn = DatabaseUtil.getConnection())
         {
             // Commencer une transaction
+        	
             conn.setAutoCommit(false);
 
-            try (PreparedStatement stmtEmprunt = conn.prepareStatement(sqlEmprunt);
-                 PreparedStatement stmtUpdateLivre = conn.prepareStatement(sqlUpdateLivre))
+            try (PreparedStatement prepaStmtEmprunt = conn.prepareStatement(sqlEmprunt);
+                 PreparedStatement prepaStmtUpdateLivre = conn.prepareStatement(sqlUpdateLivre))
             {
                 // Enregistrer l'emprunt
             	
-                stmtEmprunt.setInt(1, emprunt.getIdMembre()); // utiliser setInt pour un entier
-                stmtEmprunt.setInt(2, emprunt.getIdLivre());
-                stmtEmprunt.setObject(3, emprunt.getDateRetourPrevue()); // utiliser setObject pour LocalDate
-                stmtEmprunt.executeUpdate();
+            	prepaStmtEmprunt.setInt(1, emprunt.getIdMembre()); // utiliser setInt pour un entier
+            	prepaStmtEmprunt.setInt(2, emprunt.getIdLivre());
+            	prepaStmtEmprunt.setObject(3, emprunt.getDateRetourPrevue()); // utiliser setObject pour LocalDate
+            	prepaStmtEmprunt.executeUpdate();
 
                 // Décrémenter la quantité du livre emprunté
                 
-                stmtUpdateLivre.setInt(1, emprunt.getIdLivre());
-                stmtUpdateLivre.executeUpdate();
+            	prepaStmtUpdateLivre.setInt(1, emprunt.getIdLivre());
+            	prepaStmtUpdateLivre.executeUpdate();
 
                 // Confirmer la transaction
                 
@@ -66,9 +62,9 @@ public class EmpruntDAO
     {
         List<Emprunt> emprunts = new ArrayList<>();
 
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery("SELECT * FROM tabemprunt"))
+        try (Connection conn = DatabaseUtil.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet resultSet = stmt.executeQuery("SELECT * FROM tabemprunt"))
         {
             while (resultSet.next())
             {
@@ -95,11 +91,11 @@ public class EmpruntDAO
         List<Emprunt> emprunts = new ArrayList<>();
 
         String query = "SELECT * FROM tabemprunt WHERE id_membre = ?";
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement prepaStmt = conn.prepareStatement(query)) {
              
-            preparedStatement.setInt(1, idMembre);
-            ResultSet resultSet = preparedStatement.executeQuery();
+        	prepaStmt.setInt(1, idMembre);
+            ResultSet resultSet = prepaStmt.executeQuery();
             
             while (resultSet.next()) {
                 int idEmprunt = resultSet.getInt("id_emprunt");
@@ -121,11 +117,11 @@ public class EmpruntDAO
     public Emprunt getEmpruntById(int idEmprunt)
     {
         String query = "SELECT * FROM tabemprunt WHERE id_emprunt = ?";
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement preparedStatement = connection.prepareStatement(query))
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement prepaStmt = conn.prepareStatement(query))
         {
-            preparedStatement.setInt(1, idEmprunt);
-            ResultSet resultSet = preparedStatement.executeQuery();
+        	prepaStmt.setInt(1, idEmprunt);
+            ResultSet resultSet = prepaStmt.executeQuery();
             
             if (resultSet.next())
             {
@@ -142,24 +138,4 @@ public class EmpruntDAO
         }
         return null;
     }
-
-/*    // Afficher l'historique des emprunts d'un membre
-    public List<Emprunt> afficherHistoriqueMembre(int membreId) {
-        // Code pour récupérer l'historique des emprunts d'un membre
-        List<Emprunt> emprunts = new ArrayList<>();
-        // Ajoutez des exemples d'emprunts fictifs
-        return emprunts;
-    }
-
-    // Vérifier la disponibilité d'un livre
-    public boolean verifierDisponibiliteLivre(int livreId) {
-        // Code pour vérifier la disponibilité d'un livre
-        return true;
-    }
-
-    // Afficher l'historique des livres
-    public List<Emprunt> afficherHistoriqueLivres() {
-        // Code pour récupérer l'historique des livres empruntés
-        return new ArrayList<>();
-    }*/
 }

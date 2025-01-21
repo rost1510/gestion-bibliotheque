@@ -11,11 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RetourDAO
-{
-    private static final String URL = "jdbc:postgresql://localhost:5432/testBranch";
-    private static final String USER = "postgres";
-    private static final String PASSWORD = "postgres";
-    
+{    
     // Enregistrer un retour
 	
     public void enregistrerRetour(Retour retour)
@@ -23,25 +19,25 @@ public class RetourDAO
         String sqlRetour = "INSERT INTO tabretour (id_emprunt, date_effective_retour, penalite_retour) VALUES (?, ?, ?)";
         String sqlUpdateLivre = "UPDATE tablivre SET nombre_exemplaires_livre = nombre_exemplaires_livre + 1 WHERE id_livre = (SELECT id_livre FROM tabemprunt WHERE id_emprunt = ?)";
 
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD))
+        try (Connection conn = DatabaseUtil.getConnection())
         {
             // Commencer une transaction
         	
             conn.setAutoCommit(false);
 
-            try (PreparedStatement stmtRetour = conn.prepareStatement(sqlRetour);
-                 PreparedStatement stmtUpdateLivre = conn.prepareStatement(sqlUpdateLivre))
+            try (PreparedStatement prepaStmtRetour = conn.prepareStatement(sqlRetour);
+                 PreparedStatement prepaStmtUpdateLivre = conn.prepareStatement(sqlUpdateLivre))
             {
                 // Enregistrer le retour
             	
-            	stmtRetour.setInt(1, retour.getIdEmprunt());
-                stmtRetour.setObject(2, retour.getDateRetour());
-                stmtRetour.setInt(3, retour.getPenalite());
-                stmtRetour.executeUpdate();
+            	prepaStmtRetour.setInt(1, retour.getIdEmprunt());
+            	prepaStmtRetour.setObject(2, retour.getDateRetour());
+            	prepaStmtRetour.setInt(3, retour.getPenalite());
+            	prepaStmtRetour.executeUpdate();
                 
                 // Récupérer l'ID généré
                 
-                try (ResultSet generatedKeys = stmtRetour.getGeneratedKeys())
+                try (ResultSet generatedKeys = prepaStmtRetour.getGeneratedKeys())
                 {
                     if (generatedKeys.next())
                     {
@@ -51,8 +47,8 @@ public class RetourDAO
 
                 // Incrémenter la quantité du livre retourné
                 
-                stmtUpdateLivre.setInt(1, retour.getIdEmprunt());
-                stmtUpdateLivre.executeUpdate();
+                prepaStmtUpdateLivre.setInt(1, retour.getIdEmprunt());
+                prepaStmtUpdateLivre.executeUpdate();
 
                 // Confirmer la transaction
                 

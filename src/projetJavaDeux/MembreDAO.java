@@ -1,17 +1,17 @@
 package projetJavaDeux;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.format.DateTimeFormatter;
 
 public class MembreDAO
-{
-	// Établir la connexion avec la base de données
-	
-    private static final String URL = "jdbc:postgresql://localhost:5432/testBranch";
-    private static final String USER = "postgres";
-    private static final String PASSWORD = "postgres";
-    
+{    
     // Ajouter un membre (implémentation de base)
     
     public void ajouterMembre(Membre membre)
@@ -20,14 +20,14 @@ public class MembreDAO
     	
     	String sql = "INSERT INTO tabmembre (nom_membre, prenom_membre, email_membre, date_adhesion_membre) VALUES (?, ?, ?, NOW())";
     	
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
-        	PreparedStatement stmt = conn.prepareStatement(sql)
+        try (Connection conn = DatabaseUtil.getConnection();
+        	PreparedStatement prepaStmt = conn.prepareStatement(sql)
         	)
         {
-            stmt.setString(1, membre.getNom());
-            stmt.setString(2, membre.getPrenom());
-            stmt.setString(3, membre.getEmail());
-            stmt.executeUpdate();
+        	prepaStmt.setString(1, membre.getNom());
+        	prepaStmt.setString(2, membre.getPrenom());
+        	prepaStmt.setString(3, membre.getEmail());
+        	prepaStmt.executeUpdate();
         } catch (SQLException e)
         {
             e.printStackTrace();
@@ -39,12 +39,12 @@ public class MembreDAO
     {
         String query = "DELETE FROM tabmembre WHERE id_membre = ?";
 
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement preparedStatement = connection.prepareStatement(query))
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement prepaStmt = conn.prepareStatement(query))
         {     
-            preparedStatement.setInt(1, id);
+        	prepaStmt.setInt(1, id);
             
-            int rowsDeleted = preparedStatement.executeUpdate();
+            int rowsDeleted = prepaStmt.executeUpdate();
             if (rowsDeleted > 0)
             {
                 System.out.println("Membre supprimé avec succès.");
@@ -66,11 +66,11 @@ public class MembreDAO
         String query = "SELECT * FROM tabmembre WHERE id_membre = ?";
         Membre membre = null;
 
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement prepaStmt = conn.prepareStatement(query)) {
              
-            preparedStatement.setInt(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
+        	prepaStmt.setInt(1, id);
+            ResultSet resultSet = prepaStmt.executeQuery();
 
             if (resultSet.next()) {
                 String nom = resultSet.getString("nom_membre");
@@ -88,10 +88,4 @@ public class MembreDAO
 
         return membre;
     }
-
-/*    // Afficher les détails d'un membre
-    public Membre afficherDetailsMembre(int id) {
-        // Code pour afficher les détails d'un membre dans la base de données
-        return new Membre("Nom Exemple", "Prénom Exemple", "exemple@email.com", "2023-01-01");
-    }*/
 }

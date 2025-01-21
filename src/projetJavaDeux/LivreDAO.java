@@ -1,18 +1,16 @@
 package projetJavaDeux;
-import java.sql.*;
-import java.time.LocalDate;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDate;
 
 public class LivreDAO
-{
-	// Établir la connexion avec la base de données
-	
-    private static final String URL = "jdbc:postgresql://localhost:5432/testBranch";
-    private static final String USER = "postgres";
-    private static final String PASSWORD = "postgres";
-    
-    
+{  
     // Méthode pour Ajouter un livre nouveau (implémentation de base)
 	
     public void ajouterLivre(Livre livre)	
@@ -21,10 +19,8 @@ public class LivreDAO
 
     	String sql = "INSERT INTO tablivre (titre_livre, auteur_livre, categorie_livre, nombre_exemplaires_livre) VALUES (?, ?, ?, ?)";
 
-        try (
-        		Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
-        		PreparedStatement stmt = conn.prepareStatement(sql)
-        	)
+        try (Connection conn = DatabaseUtil.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql))
         {
         	stmt.setString(1, livre.getTitre());
             stmt.setString(2, livre.getAuteur());
@@ -38,34 +34,42 @@ public class LivreDAO
     }
     
  // Méthode pour ajouter la quantité d'un livre existant par ID
-    public boolean ajouterQuantiteParId(int id, int quantite) {
+    
+    public boolean ajouterQuantiteParId(int id, int quantite)
+    {
         String query = "UPDATE tablivre SET nombre_exemplaires_livre = nombre_exemplaires_livre + ? WHERE id_livre = ?";
         
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement stmt = conn.prepareStatement(query)) {
+        try (Connection conn = DatabaseUtil.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(query))
+        {
             stmt.setInt(1, quantite);
             stmt.setInt(2, id);
             
             int rowsUpdated = stmt.executeUpdate();
             return rowsUpdated > 0;
-        } catch (SQLException e) {
+        } catch (SQLException e)
+        {
             e.printStackTrace();
             return false;
         }
     }
 
     // Méthode pour ajouter la quantité d'un livre existant par titre
-    public boolean ajouterQuantiteParTitre(String titre, int quantite) {
+    
+    public boolean ajouterQuantiteParTitre(String titre, int quantite)
+    {
         String query = "UPDATE tablivre SET nombre_exemplaires_livre = nombre_exemplaires_livre + ? WHERE titre_livre = ?";
-        
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+        try (Connection conn = DatabaseUtil.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(query))
+        {
             stmt.setInt(1, quantite);
             stmt.setString(2, titre);
             
             int rowsUpdated = stmt.executeUpdate();
             return rowsUpdated > 0;
-        } catch (SQLException e) {
+        } catch (SQLException e)
+        {
             e.printStackTrace();
             return false;
         }
@@ -77,8 +81,8 @@ public class LivreDAO
     {
         List<Livre> livres = new ArrayList<>();
 
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM tablivre WHERE titre_livre = ?"))
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement preparedStatement = conn.prepareStatement("SELECT * FROM tablivre WHERE titre_livre = ?"))
         {
             preparedStatement.setString(1, titre_livre);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -107,8 +111,8 @@ public class LivreDAO
     {
     	List<Livre> livres = new ArrayList<>();
     	
-    	try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-    	     PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM tablivre WHERE categorie_livre = ?"))
+    	try (Connection conn = DatabaseUtil.getConnection();
+    	     PreparedStatement preparedStatement = conn.prepareStatement("SELECT * FROM tablivre WHERE categorie_livre = ?"))
     	{
     		preparedStatement.setString(1, categorie);
     		ResultSet resultSet = preparedStatement.executeQuery();
@@ -135,9 +139,9 @@ public class LivreDAO
     {
         List<Livre> livres = new ArrayList<>();
 
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery("SELECT * FROM tablivre"))
+        try (Connection conn = DatabaseUtil.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet resultSet = stmt.executeQuery("SELECT * FROM tablivre"))
         {
             while (resultSet.next())
             {
@@ -153,26 +157,25 @@ public class LivreDAO
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return livres;
     }
 
     // Modifier un livre
-    
+
     public void modifierLivre(Livre livre)
     {
         String query = "UPDATE tablivre SET titre_livre = ?, auteur_livre = ?, categorie_livre = ?, nombre_exemplaires_livre = ? WHERE id_livre = ?";
         
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement preparedStatement = connection.prepareStatement(query))
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement prepaStmt = conn.prepareStatement(query))
         {             
-            preparedStatement.setString(1, livre.getTitre());
-            preparedStatement.setString(2, livre.getAuteur());
-            preparedStatement.setString(3, livre.getCategorie());
-            preparedStatement.setInt(4, livre.getNombreExemplaires());
-            preparedStatement.setInt(5, livre.getId());
+        	prepaStmt.setString(1, livre.getTitre());
+        	prepaStmt.setString(2, livre.getAuteur());
+        	prepaStmt.setString(3, livre.getCategorie());
+        	prepaStmt.setInt(4, livre.getNombreExemplaires());
+        	prepaStmt.setInt(5, livre.getId());
             
-            int rowsUpdated = preparedStatement.executeUpdate();
+            int rowsUpdated = prepaStmt.executeUpdate();
             if (rowsUpdated > 0)
             {
                 System.out.println("Le livre a été modifié avec succès.");
@@ -188,17 +191,17 @@ public class LivreDAO
     }
 
     // Supprimer un livre
-    
+
     public void supprimerLivre(int id)
     {
         String query = "DELETE FROM tablivre WHERE id_livre = ?";
 
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement preparedStatement = connection.prepareStatement(query))
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement prepaStmt = conn.prepareStatement(query))
         {     
-            preparedStatement.setInt(1, id);
+        	prepaStmt.setInt(1, id);
             
-            int rowsDeleted = preparedStatement.executeUpdate();
+            int rowsDeleted = prepaStmt.executeUpdate();
             if (rowsDeleted > 0)
             {
                 System.out.println("Livre supprimé avec succès.");
@@ -220,11 +223,11 @@ public class LivreDAO
         String query = "SELECT nombre_exemplaires_livre FROM tablivre WHERE titre_livre = ?";
         boolean disponible = false;
 
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement preparedStatement = connection.prepareStatement(query))
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement prepaStmt = conn.prepareStatement(query))
         {
-            preparedStatement.setString(1, titre);
-            ResultSet resultSet = preparedStatement.executeQuery();
+        	prepaStmt.setString(1, titre);
+            ResultSet resultSet = prepaStmt.executeQuery();
 
             if (resultSet.next())
             {

@@ -14,7 +14,7 @@ public class Main
     private static MembreDAO membreDAO = new MembreDAO();
     private static EmpruntDAO empruntDAO = new EmpruntDAO();
     private static RetourDAO retourDAO = new RetourDAO();
-    private static HistoriqueEmpruntDAO historiqueEmpruntDAO = new HistoriqueEmpruntDAO();
+	
     //-----------------------------------------------------------------------------------
     
     public static void main(String[] args)
