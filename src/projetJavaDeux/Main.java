@@ -33,7 +33,7 @@ public class Main
             System.out.println("2. Gestion des membres");
             System.out.println("3. Gestion des transactions");
             System.out.println("4. Quitter");
-            System.out.print("Indiquez votre choix par un numéro de [1;5]: ");
+            System.out.print("Indiquez votre choix par un numéro de [1;4]: ");
 
             int choix = scanner.nextInt();
             scanner.nextLine();  // Consommer la nouvelle ligne après un entier
@@ -70,7 +70,7 @@ public class Main
             System.out.println("4. Modifier");
             System.out.println("5. Supprimer");
             System.out.println("0. Retour");
-            System.out.print("Indiquez votre choix parmi les numéros (1-6 ou 0): ");
+            System.out.print("Indiquez votre choix parmi les numéros (1-5 ou 0): ");
 
             int choix = scanner.nextInt();
             scanner.nextLine();  // Consommer la nouvelle ligne après un entier
@@ -301,7 +301,7 @@ public class Main
             System.out.println("3. Rechercher");
 //            System.out.println("4. Profil");
             System.out.println("0. Retourner au menu principal");
-            System.out.print("Choisissez une option (1-4, ou 0): ");
+            System.out.print("Choisissez une option (1-3, ou 0): ");
 
             int choix = scanner.nextInt();
             scanner.nextLine();  // Consommer la nouvelle ligne après un entier
@@ -408,10 +408,10 @@ public class Main
             System.out.println("\n=== Gestion des Emprunts ===");
             System.out.println("1. Vérifier Disponibilité");	// rechercher d'un livre	1.2 
             System.out.println("2. Emprunt");
-            System.out.println("4. Tous les emprunts");
-            System.out.println("5. Mes emprunts");
+            System.out.println("3. Tous les emprunts");
+            System.out.println("4. Mes emprunts");
             System.out.println("0. Retourner au menu principal");
-            System.out.print("Choisissez une option (1-2, ou 0): ");
+            System.out.print("Choisissez une option (1-4, ou 0): ");
 
             int choix = scanner.nextInt();
             scanner.nextLine();  // Consommer la nouvelle ligne après un entier
@@ -504,7 +504,7 @@ public class Main
 	{
 		while (true)
 		{
-			System.out.println("\n=== Gestion des Emprunts ===");
+			System.out.println("\n=== Gestion des Retours ===");
 			System.out.println("1. Enregistrer Retour");
             System.out.println("2. Consulter les pénalités");
             System.out.println("3. Endosser une pénalité");
